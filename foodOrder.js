@@ -1,84 +1,54 @@
-const formatTime = (seconds) => (seconds / 1000).toFixed(2);
+const timeElapsed = (startTime) =>
+  `[${((Date.now() - startTime) / 1000).toFixed(2)}s]`;
 
-const secondsElapsed = (orderTime) => {
-  return `[${formatTime(Date.now() - orderTime)}s]`;
+const receiveOrder = () => {
+  return new Promise((resolve) => {
+    const startTime = Date.now();
+    const order = { orderId: 123, startTime, item: "burger" };
+    console.log(`[0.00s] Order received:`, order);
+    resolve(order);
+  });
 };
 
-const deliveryOrder = (orderDetails) => {
-  const orderInfo = { ...orderDetails };
-
-  setTimeout(() => {
-    console.log(`${secondsElapsed(orderInfo.orderTime)} Delivering order...`);
-  }, 5200);
-
-  setTimeout(() => {
-    orderInfo.deliveredBy = "delivered by John at 7:30 PM";
-
-    console.log(
-      `${secondsElapsed(orderInfo.orderTime)} Order delivered: {orderId: ${
-        orderInfo.orderId
-      },foodDetails:${orderInfo.items},packageDetails: ${
-        orderInfo.packageDetails
-      } deliveryDetails: ${orderInfo.deliveredBy} }`
-    );
-  }, 10000);
+const prepareFood = (order) => {
+  console.log(`${timeElapsed(order.startTime)} Preparing food...`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(`${timeElapsed(order.startTime)} Food is ready:`, order);
+      resolve(order);
+    }, 3000);
+  });
 };
 
-const packFood = (orderDetails) => {
-  const orderInfo = { ...orderDetails };
-
-  setTimeout(() => {
-    console.log(`${secondsElapsed(orderInfo.orderTime)} Packing order...`);
-  }, 3200);
-
-  orderInfo.packageDetails = "Packed in eco-friendly box";
-
-  setTimeout(() => {
-    console.log(
-      `${secondsElapsed(orderInfo.orderTime)} Order packed: {orderId: ${
-        orderInfo.orderId
-      },foodDetails:${orderInfo.items},packageDetails:${
-        orderInfo.packageDetails
-      } }`
-    );
-  }, 5000);
-
-  return deliveryOrder(orderInfo);
+const packOrder = (order) => {
+  console.log(`${timeElapsed(order.startTime)} Packing order...`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      order.packageDetails = "Packed in eco-friendly box";
+      console.log(`${timeElapsed(order.startTime)} Order packed:`, order);
+      resolve(order);
+    }, 2000);
+  });
 };
 
-const prepareFood = (orderDetails) => {
-  setTimeout(() => {
-    console.log(`${secondsElapsed(orderDetails.orderTime)} Preparing food...`);
-  }, 10);
+const deliverOrder = (order) => {
+  console.log(`${timeElapsed(order.startTime)} Delivering order...`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      order.deliveryDetails = "Delivered by John at 7:30 PM";
 
-  setTimeout(() => {
-    console.log(
-      `${secondsElapsed(orderDetails.orderTime)} Food is ready: {orderId: ${
-        orderDetails.orderId
-      },foodDetails: ${orderDetails.items}}`
-    );
-  }, 3000);
-
-  return packFood(orderDetails);
-};
-
-const orderFood = (item) => {
-  const orderDetails = {
-    orderId: Math.floor(Math.random() * 1000),
-    orderTime: Date.now(),
-    items: item,
-  };
-
-  console.log(
-    `[${formatTime(0)}s] Order recieved : {#${orderDetails.orderId}}`
-  );
-
-  return prepareFood(orderDetails);
+      console.log(`${timeElapsed(order.startTime)} Order delivered:`, order);
+      resolve(order);
+    }, 5000);
+  });
 };
 
 const main = () => {
-  orderFood("Burger & Fries");
-  // orderFood(prompt("enter food item name:"));
+  receiveOrder()
+    .then(prepareFood)
+    .then(packOrder)
+    .then(deliverOrder)
+    .catch((error) => console.error("Error:", error));
 };
 
 main();
